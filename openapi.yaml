@@ -1,0 +1,382 @@
+openapi: 3.0.3
+info:
+  title: Tilt Protocol Trading API
+  description: Alpaca-compatible REST API for trading tokenized equities on-chain.
+  version: 1.0.0
+  contact:
+    name: Tilt Protocol
+    url: https://tiltprotocol.com
+
+servers:
+  - url: https://api.tiltprotocol.com
+    description: Production
+
+security:
+  - apiKey: []
+
+paths:
+  /v1/auth/keys:
+    post:
+      summary: Create API key pair
+      tags: [Authentication]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [wallet_address, vault_address, signature, timestamp]
+              properties:
+                wallet_address:
+                  type: string
+                  example: "0x1234567890abcdef1234567890abcdef12345678"
+                vault_address:
+                  type: string
+                  example: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
+                signature:
+                  type: string
+                  description: EIP-191 signature proving wallet ownership
+                timestamp:
+                  type: integer
+                  description: Unix timestamp (must be within 5 minutes)
+      responses:
+        "200":
+          description: API key created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key_id:
+                    type: string
+                    example: ak_live_abc123
+                  secret:
+                    type: string
+                    example: sk_live_xyz789
+                  vault_address:
+                    type: string
+
+  /v1/trading/orders:
+    post:
+      summary: Place an order
+      tags: [Orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequest"
+      responses:
+        "200":
+          description: Order placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "422":
+          description: Validation error or execution failed
+    get:
+      summary: List orders
+      tags: [Orders]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, all]
+            default: all
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+  /v1/trading/orders/{id}:
+    get:
+      summary: Get order by ID
+      tags: [Orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Order not found
+    delete:
+      summary: Cancel an order
+      tags: [Orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order canceled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /v1/trading/positions:
+    get:
+      summary: List all positions
+      tags: [Positions]
+      responses:
+        "200":
+          description: List of positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Position"
+
+  /v1/trading/positions/{symbol}:
+    get:
+      summary: Get position by symbol
+      tags: [Positions]
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Position details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+        "404":
+          description: No position in this symbol
+
+  /v1/trading/account:
+    get:
+      summary: Get account info
+      tags: [Account]
+      responses:
+        "200":
+          description: Account / vault details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /v1/trading/assets:
+    get:
+      summary: List available assets
+      tags: [Assets]
+      parameters:
+        - name: q
+          in: query
+          description: Search by ticker or name
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Asset"
+
+  /v1/trading/assets/{symbol}:
+    get:
+      summary: Get asset by symbol
+      tags: [Assets]
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Asset details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asset"
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: TILT-API-KEY-ID
+      description: "Also requires TILT-API-SECRET header"
+
+  schemas:
+    OrderRequest:
+      type: object
+      required: [symbol, side]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        qty:
+          type: string
+          example: "10"
+        notional:
+          type: string
+          example: "5000"
+          description: USD amount (alternative to qty)
+        side:
+          type: string
+          enum: [buy, sell]
+        type:
+          type: string
+          enum: [market, limit]
+          default: market
+        time_in_force:
+          type: string
+          enum: [day, gtc, ioc, fok]
+          default: day
+        limit_price:
+          type: string
+          description: Required for limit orders
+        client_order_id:
+          type: string
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ord_abc123
+        client_order_id:
+          type: string
+        status:
+          type: string
+          enum: [new, accepted, pending_new, partially_filled, filled, canceled, expired, rejected]
+        symbol:
+          type: string
+        qty:
+          type: string
+        filled_qty:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        type:
+          type: string
+          enum: [market, limit]
+        time_in_force:
+          type: string
+        limit_price:
+          type: string
+          nullable: true
+        filled_avg_price:
+          type: string
+          nullable: true
+        filled_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        tx_hash:
+          type: string
+          nullable: true
+
+    Position:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        asset_id:
+          type: string
+        qty:
+          type: string
+        market_value:
+          type: string
+        current_price:
+          type: string
+        avg_entry_price:
+          type: string
+          nullable: true
+        side:
+          type: string
+          example: long
+        exchange:
+          type: string
+          example: TILT
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        currency:
+          type: string
+          example: USD
+        cash:
+          type: string
+        portfolio_value:
+          type: string
+        share_price:
+          type: string
+        buying_power:
+          type: string
+        vault_name:
+          type: string
+        vault_symbol:
+          type: string
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        symbol:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, not_deployed]
+        tradable:
+          type: boolean
+        price:
+          type: string
+        exchange:
+          type: string
+          example: TILT
+        class:
+          type: string
+          example: us_equity

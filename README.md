@@ -97,6 +97,7 @@ Every request requires two headers:
 
 - [Python](examples/python/)
 - [TypeScript](examples/typescript/)
+- [VB.NET](examples/vbnet/) — drop-in client for IB TWS API users
 - [curl](examples/curl/examples.sh)
 
 ## OpenAPI Spec

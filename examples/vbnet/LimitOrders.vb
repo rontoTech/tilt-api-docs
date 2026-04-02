@@ -1,7 +1,11 @@
 ' =============================================================================
 ' Tilt API — Limit Orders (VB.NET)
 ' =============================================================================
-' Place a GTC limit buy, poll until filled or cancel after timeout.
+' Resting limits: POST returns Status=accepted; keeper fills when price rules met
+'   (buy: market <= limit, sell: market >= limit). See docs/trading-guide.md
+'
+' GTC example below. For GTD use timeInForce:="gtd" and expiresAtIso8601:="...Z"
+' on PlaceLimitBuyAsync / PlaceLimitSellAsync / PlaceOrderAsync.
 ' =============================================================================
 
 Imports System

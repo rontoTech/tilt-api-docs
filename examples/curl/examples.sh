@@ -25,11 +25,21 @@ curl -s "$BASE/v1/trading/positions" -H "TILT-API-KEY-ID: $KEY" -H "TILT-API-SEC
 echo "=== Assets (search AAPL) ==="
 curl -s "$BASE/v1/trading/assets?q=AAPL" -H "TILT-API-KEY-ID: $KEY" -H "TILT-API-SECRET: $SECRET" | jq .
 
-echo "=== Place Limit Buy ==="
+echo "=== Place Limit Buy (GTC, resting until filled) ==="
 curl -s -X POST "$BASE/v1/trading/orders" \
   -H "TILT-API-KEY-ID: $KEY" -H "TILT-API-SECRET: $SECRET" \
   -H "Content-Type: application/json" \
   -d '{"symbol":"TSLA","qty":"5","side":"buy","type":"limit","limit_price":"180.00","time_in_force":"gtc"}' | jq .
+
+echo "=== Place Limit Sell (GTD — requires expires_at ISO-8601) ==="
+EXPIRES="$(python3 -c 'from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z"))')"
+curl -s -X POST "$BASE/v1/trading/orders" \
+  -H "TILT-API-KEY-ID: $KEY" -H "TILT-API-SECRET: $SECRET" \
+  -H "Content-Type: application/json" \
+  -d "{\"symbol\":\"MSFT\",\"qty\":\"2\",\"side\":\"sell\",\"type\":\"limit\",\"limit_price\":\"400.00\",\"time_in_force\":\"gtd\",\"expires_at\":\"$EXPIRES\"}" | jq .
+
+echo "=== List Open Orders (resting limits) ==="
+curl -s "$BASE/v1/trading/orders?status=open&limit=20" -H "TILT-API-KEY-ID: $KEY" -H "TILT-API-SECRET: $SECRET" | jq .
 
 echo "=== Cancel Order (replace ORDER_ID) ==="
 # curl -s -X DELETE "$BASE/v1/trading/orders/ORDER_ID" -H "TILT-API-KEY-ID: $KEY" -H "TILT-API-SECRET: $SECRET" | jq .

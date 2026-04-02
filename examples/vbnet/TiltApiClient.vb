@@ -71,6 +71,18 @@ Public Class TiltOrder
 
     <JsonPropertyName("tx_hash")>
     Public Property TxHash As String
+
+    <JsonPropertyName("expires_at")>
+    Public Property ExpiresAt As String
+
+    <JsonPropertyName("expired_at")>
+    Public Property ExpiredAt As String
+
+    <JsonPropertyName("canceled_at")>
+    Public Property CanceledAt As String
+
+    <JsonPropertyName("error_message")>
+    Public Property ErrorMessage As String
 End Class
 
 Public Class TiltPosition
@@ -257,11 +269,13 @@ Public Class TiltApiClient
     Public Async Function PlaceLimitBuyAsync(symbol As String, qty As Decimal,
             limitPrice As Decimal,
             Optional timeInForce As String = "gtc",
-            Optional clientOrderId As String = Nothing) As Task(Of TiltOrder)
+            Optional clientOrderId As String = Nothing,
+            Optional expiresAtIso8601 As String = Nothing) As Task(Of TiltOrder)
         Return Await PlaceOrderAsync(symbol, "buy", "limit", timeInForce,
                                      qty:=qty.ToString(),
                                      limitPrice:=limitPrice.ToString("F2"),
-                                     clientOrderId:=clientOrderId)
+                                     clientOrderId:=clientOrderId,
+                                     expiresAtIso8601:=expiresAtIso8601)
     End Function
 
     ''' <summary>
@@ -270,11 +284,13 @@ Public Class TiltApiClient
     Public Async Function PlaceLimitSellAsync(symbol As String, qty As Decimal,
             limitPrice As Decimal,
             Optional timeInForce As String = "gtc",
-            Optional clientOrderId As String = Nothing) As Task(Of TiltOrder)
+            Optional clientOrderId As String = Nothing,
+            Optional expiresAtIso8601 As String = Nothing) As Task(Of TiltOrder)
         Return Await PlaceOrderAsync(symbol, "sell", "limit", timeInForce,
                                      qty:=qty.ToString(),
                                      limitPrice:=limitPrice.ToString("F2"),
-                                     clientOrderId:=clientOrderId)
+                                     clientOrderId:=clientOrderId,
+                                     expiresAtIso8601:=expiresAtIso8601)
     End Function
 
     ''' <summary>
@@ -285,7 +301,8 @@ Public Class TiltApiClient
             Optional qty As String = Nothing,
             Optional notional As String = Nothing,
             Optional limitPrice As String = Nothing,
-            Optional clientOrderId As String = Nothing) As Task(Of TiltOrder)
+            Optional clientOrderId As String = Nothing,
+            Optional expiresAtIso8601 As String = Nothing) As Task(Of TiltOrder)
 
         Dim body As New Dictionary(Of String, String) From {
             {"symbol", symbol.ToUpper()},
@@ -297,6 +314,8 @@ Public Class TiltApiClient
         If notional IsNot Nothing Then body("notional") = notional
         If limitPrice IsNot Nothing Then body("limit_price") = limitPrice
         If clientOrderId IsNot Nothing Then body("client_order_id") = clientOrderId
+        ' Required when time_in_force is "gtd" (e.g. 2026-12-31T21:00:00.000Z)
+        If expiresAtIso8601 IsNot Nothing Then body("expires_at") = expiresAtIso8601
 
         Return Await PostAsync(Of TiltOrder)("/v1/trading/orders", body)
     End Function

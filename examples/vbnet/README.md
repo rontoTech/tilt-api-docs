@@ -30,7 +30,7 @@ Then add `TiltApiClient.vb` to your project.
 | `TiltApiClient.vb` | Full API client — add this to any VB.NET project |
 | `QuickStart.vb` | Place a market buy and check account |
 | `Portfolio.vb` | Display account info and all positions |
-| `LimitOrders.vb` | Place a limit order, poll for fill, cancel on timeout |
+| `LimitOrders.vb` | GTC limit buy — poll for fill or cancel on timeout ([limit orders guide](../../docs/trading-guide.md)) |
 | `SearchAndTrade.vb` | Search stocks and buy unlisted tokens (auto-deploy) |
 
 ## Quick Example
@@ -59,9 +59,9 @@ The `TiltApiClient` exposes these methods:
 - `PlaceMarketBuyAsync(symbol, notional)` — Buy by dollar amount
 - `PlaceMarketBuyQtyAsync(symbol, qty)` — Buy by share count
 - `PlaceMarketSellAsync(symbol, qty)` — Sell shares
-- `PlaceLimitBuyAsync(symbol, qty, limitPrice)` — Limit buy (GTC default)
-- `PlaceLimitSellAsync(symbol, qty, limitPrice)` — Limit sell
-- `PlaceOrderAsync(...)` — Generic order placement
+- `PlaceLimitBuyAsync(symbol, qty, limitPrice, …, expiresAtIso8601)` — Resting limit buy (`gtc`/`day`/`gtd`; pass `expiresAtIso8601` when `time_in_force` is `gtd`)
+- `PlaceLimitSellAsync(symbol, qty, limitPrice, …, expiresAtIso8601)` — Resting limit sell
+- `PlaceOrderAsync(..., expiresAtIso8601)` — Generic placement; use `notional` or `qty`, and `expires_at` for GTD
 - `ListOrdersAsync(status, limit)` — List orders
 - `GetOrderAsync(orderId)` — Get single order
 - `CancelOrderAsync(orderId)` — Cancel open order
@@ -93,3 +93,4 @@ Key differences:
 - **No contract objects** — just use ticker symbols like `"AAPL"`
 - **Async/Await** — all methods are async (no callback events)
 - **Auto-deploy** — stocks not yet on-chain are deployed automatically on first trade
+- **Limit orders** — `POST` returns `accepted` until filled; see [Trading guide](../../docs/trading-guide.md) for GTC/GTD/day, fill rules, and delegate setup

@@ -43,8 +43,13 @@ Instead of a brokerage account, you have a **vault** — a smart contract that h
 ### No fractional shares (yet)
 Quantities map to on-chain token balances. Fractional share support is on the roadmap but not yet available. Use `notional` orders to invest a dollar amount; the protocol handles the math.
 
-### Market hours only for limit orders
-Limit orders are checked against oracle prices during US market hours (9:30 AM – 4:00 PM ET). Outside market hours, limit orders remain resting and are not evaluated.
+### Limit orders: resting behavior and hours
+Limit orders are **resting**: `POST` returns `accepted` and a **keeper** attempts fills on a short interval (~5s) when US equity hours are **open** (with a pre/post window on the server). Outside that window, orders usually stay open without fill attempts; **`day`** orders may **expire** after the close. **`gtd`** orders also expire at **`expires_at`** regardless of market hours.
+
+Fill rules: **buy** when quote **≤** `limit_price`; **sell** when quote **≥** `limit_price`. See [Trading guide](./trading-guide.md).
+
+### Delegate required for limit fills
+The backend **delegate** wallet must be authorized on your vault to execute limit fills. Without it, orders may sit as `accepted` or end as `rejected`.
 
 ### Token deployment
 Valid tickers are often **auto-deployed** on first trade via `POST /v1/trading/orders`. For a manual deploy (e.g. agents), use `POST https://api.tiltprotocol.com/api/agents/deploy-token` with `{"symbol":"TICK"}`. Alpaca/IBKR don't have this concept.
@@ -57,7 +62,7 @@ Valid tickers are often **auto-deployed** on first trade via `POST /v1/trading/o
 - **JSON responses** — field names and structures are intentionally close to Alpaca's
 - **Order lifecycle** — `new → accepted → filled/canceled/expired/rejected` mirrors Alpaca exactly
 - **Position tracking** — same `symbol`, `qty`, `market_value` fields
-- **Order types** — `market` and `limit` with `day` and `gtc` time-in-force
+- **Order types** — `market` and `limit` with `day`, `gtc`, and **`gtd`** (`expires_at` ISO-8601 required for GTD)
 
 ---
 

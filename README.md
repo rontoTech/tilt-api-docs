@@ -89,6 +89,7 @@ Every request requires two headers:
 
 ## Documentation
 
+- **[Fund Manager Trading Guide](docs/trading-guide.md)** — market vs limit, GTC/GTD/day, fill logic, delegate, polling
 - [Authentication](docs/authentication.md)
 - [Orders](docs/orders.md)
 - [Positions](docs/positions.md)

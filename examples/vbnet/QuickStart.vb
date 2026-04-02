@@ -15,12 +15,12 @@ Imports System
 Imports System.Threading.Tasks
 
 Module QuickStart
-    Private Const KEY_ID  As String = "ak_live_YOUR_KEY"
-    Private Const SECRET  As String = "sk_live_YOUR_SECRET"
-    Private Const API_URL As String = "https://bowstring-backend-production.up.railway.app"
+    Private Const KEY_ID As String = "ak_live_YOUR_KEY"
+    Private Const SECRET As String = "sk_live_YOUR_SECRET"
 
     Async Function Main() As Task
-        Using client As New TiltApiClient(KEY_ID, SECRET, API_URL)
+        ' Production API: https://api.tiltprotocol.com (default when base URL is omitted)
+        Using client As New TiltApiClient(KEY_ID, SECRET)
 
             ' --- Place a $5,000 market buy on AAPL ---
             Console.WriteLine("Placing $5,000 market buy on AAPL...")

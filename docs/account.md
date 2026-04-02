@@ -1,5 +1,7 @@
 # Account
 
+**Base URL:** `https://api.tiltprotocol.com`
+
 The account endpoint returns details about the vault associated with your API key.
 
 ---

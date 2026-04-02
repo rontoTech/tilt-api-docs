@@ -1,5 +1,6 @@
 #!/bin/bash
 # Tilt Protocol Trading API — curl examples
+# Production API host (fund managers): https://api.tiltprotocol.com
 # Replace YOUR_KEY and YOUR_SECRET with real values
 
 KEY="ak_live_YOUR_KEY"

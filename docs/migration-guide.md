@@ -1,5 +1,7 @@
 # Migration Guide — Alpaca / IBKR to Tilt
 
+**Base URL:** `https://api.tiltprotocol.com`
+
 If you're coming from Alpaca or Interactive Brokers, this guide maps the concepts and endpoints you already know to their Tilt equivalents.
 
 ---
@@ -45,7 +47,7 @@ Quantities map to on-chain token balances. Fractional share support is on the ro
 Limit orders are checked against oracle prices during US market hours (9:30 AM – 4:00 PM ET). Outside market hours, limit orders remain resting and are not evaluated.
 
 ### Token deployment
-Some assets may have `status: "not_deployed"`. You need to call `POST /api/agents/deploy-token` before trading them. Alpaca/IBKR don't have this concept.
+Valid tickers are often **auto-deployed** on first trade via `POST /v1/trading/orders`. For a manual deploy (e.g. agents), use `POST https://api.tiltprotocol.com/api/agents/deploy-token` with `{"symbol":"TICK"}`. Alpaca/IBKR don't have this concept.
 
 ---
 
@@ -65,5 +67,5 @@ Some assets may have `status: "not_deployed"`. You need to call `POST /api/agent
 2. Update base URL to `https://api.tiltprotocol.com`
 3. Change API version prefix from `/v2/` to `/v1/trading/`
 4. Handle `tx_hash` in order responses (new field)
-5. Add token deployment logic for `not_deployed` assets
+5. Rely on auto-deploy for trading where supported, or call `https://api.tiltprotocol.com/api/agents/deploy-token` when you need an explicit deploy step
 6. Update error handling to use Tilt error codes (see [Errors](./errors.md))

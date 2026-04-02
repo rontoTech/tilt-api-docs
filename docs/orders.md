@@ -1,5 +1,7 @@
 # Orders
 
+**Base URL:** `https://api.tiltprotocol.com` — paths below are appended to this host (e.g. `POST https://api.tiltprotocol.com/v1/trading/orders`).
+
 ## Order Types
 
 | Type | Behavior |

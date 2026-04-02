@@ -35,6 +35,8 @@ Then add `TiltApiClient.vb` to your project.
 
 ## Quick Example
 
+Default production host is `https://api.tiltprotocol.com` (omit the third constructor argument). Override only for staging.
+
 ```vb
 Dim client As New TiltApiClient("ak_live_...", "sk_live_...")
 

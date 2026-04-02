@@ -55,9 +55,14 @@ curl https://api.tiltprotocol.com/v1/trading/positions \
 
 ## Base URL
 
+Fund managers and integrations should use this host for **all** HTTPS API traffic (trading, auth keys, and agent helpers such as deploy-token):
+
 ```
 https://api.tiltprotocol.com
 ```
+
+- Append paths directly, e.g. `https://api.tiltprotocol.com/v1/trading/orders`. Do not use legacy staging hostnames.
+- A trailing slash on the host alone is optional; clients should normalize the base URL without a trailing slash.
 
 ## Authentication
 

@@ -1,5 +1,7 @@
 # Assets
 
+**Base URL:** `https://api.tiltprotocol.com`
+
 The assets endpoints let you discover and search the 7,000+ US equities available for trading on Tilt.
 
 ---
@@ -77,10 +79,10 @@ GET /v1/trading/assets/:symbol
 
 ## Deploying Not-Yet-Deployed Tokens
 
-Some assets have `status: "not_deployed"`, meaning the on-chain token contract has not been created yet. Before you can trade them, deploy the token:
+Some assets may show as not yet deployed on-chain. The **Trading API** often auto-deploys valid tickers on the first order. To deploy manually (e.g. for agents), call:
 
 ```
-POST /api/agents/deploy-token
+POST https://api.tiltprotocol.com/api/agents/deploy-token
 ```
 
 ### Request

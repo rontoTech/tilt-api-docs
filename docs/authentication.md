@@ -1,5 +1,7 @@
 # Authentication
 
+**Base URL:** `https://api.tiltprotocol.com` — use this host for `POST /v1/auth/keys` and all authenticated trading calls.
+
 The Tilt Trading API uses **API key pairs** for authentication. Every request must include two headers:
 
 | Header | Description |

@@ -198,7 +198,7 @@ Public Class TiltApiClient
     ''' </summary>
     ''' <param name="keyId">API Key ID (starts with ak_live_)</param>
     ''' <param name="secret">API Secret (starts with sk_live_)</param>
-    ''' <param name="baseUrl">Override the API base URL (default: production)</param>
+    ''' <param name="baseUrl">Override the API base URL (default: https://api.tiltprotocol.com — no trailing slash)</param>
     Public Sub New(keyId As String, secret As String,
                    Optional baseUrl As String = "https://api.tiltprotocol.com")
         _baseUrl = baseUrl.TrimEnd("/"c)

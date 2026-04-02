@@ -1,5 +1,7 @@
 # Error Handling
 
+**Base URL:** `https://api.tiltprotocol.com`
+
 ## HTTP Status Codes
 
 | Code | Meaning |

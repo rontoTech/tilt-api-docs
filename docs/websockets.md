@@ -1,5 +1,7 @@
 # WebSockets (planned)
 
+**Base URL:** `https://api.tiltprotocol.com`
+
 Real-time order and fill updates over WebSockets are not available yet. Use polling:
 
 - `GET /v1/trading/orders?status=open` for resting orders

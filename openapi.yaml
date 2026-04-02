@@ -9,7 +9,7 @@ info:
 
 servers:
   - url: https://api.tiltprotocol.com
-    description: Production
+    description: Production (fund manager API — use this host; no trailing slash)
 
 security:
   - apiKey: []

@@ -17,6 +17,10 @@ GET /v1/trading/assets
 | Param | Type | Description |
 |-------|------|-------------|
 | `q` | string | Search by symbol or name (e.g. `?q=AAPL`) |
+| `limit` | integer | Max results to return (default 200, max 1000) |
+| `offset` | integer | Number of results to skip (default 0) |
+| `page` | integer | Page number (1-indexed, alternative to offset) |
+| `after` | string | Ticker symbol to start after (exclusive, e.g. `?after=AAPL`) |
 
 ### Response
 

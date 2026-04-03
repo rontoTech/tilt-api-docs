@@ -209,9 +209,27 @@ paths:
             type: string
         - name: limit
           in: query
+          description: Max number of results (up to 1000)
           schema:
             type: integer
-            default: 50
+            default: 200
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+        - name: page
+          in: query
+          description: Page number (1-indexed, alternative to offset)
+          schema:
+            type: integer
+            default: 1
+        - name: after
+          in: query
+          description: Ticker symbol to start after (exclusive)
+          schema:
+            type: string
       responses:
         "200":
           description: List of assets

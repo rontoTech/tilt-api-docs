@@ -78,7 +78,7 @@ POST /v1/trading/orders
 
 ### Relayer, nonces, and burst market orders
 
-Market orders are executed by the **backend relayer** (`0xd3f9Dcd6011E1aA13eEB277d9CE5F2f7c9BB6070` when using the standard Tilt deployment). Each fill involves **on-chain transactions** (oracle price push + `executeTrade`) that must use a single, monotonic **account nonce**.
+Market orders are executed by the **backend relayer** (via the `TradeDelegateProxy` at `0xe67B013939D4118333d94B58FAf82936ca7eE978`). Each fill involves **on-chain transactions** (oracle price push + `executeTrade`) that must use a single, monotonic **account nonce**.
 
 **What went wrong historically (Apr 2026):** Submitting **many market orders in parallel or within a few seconds** could cause RPC errors such as `nonce has already been used`. The API sometimes returned **`422`** with `status: "rejected"` while a transaction was **still in the mempool**, which could **confirm later** — leading to **double fills** if the client retried. **Mitigation on the client side** (still good practice): use a unique `client_order_id`, verify `GET /v1/trading/positions` (or account cash) before retrying, and prefer **`gtc`** for limit workflows when **`day`** session expiry is not required.
 

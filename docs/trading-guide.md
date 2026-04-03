@@ -187,7 +187,7 @@ for p in positions:
 
 ## 12. Relayer wallet, nonces, and safe automation
 
-All **`POST /v1/trading/orders`** market fills and limit-order **keeper** fills are signed by the **same backend relayer** (standard Tilt delegate: `0xd3f9Dcd6011E1aA13eEB277d9CE5F2f7c9BB6070`). On-chain transactions from that account share one **nonce sequence**.
+All **`POST /v1/trading/orders`** market fills and limit-order **keeper** fills are signed by the **backend relayer** (or its delegate proxy: `0xe67B013939D4118333d94B58FAf82936ca7eE978`). On-chain transactions from that account share one **nonce sequence**.
 
 ### Historical issue (Apr 2026)
 

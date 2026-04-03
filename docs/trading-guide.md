@@ -150,7 +150,32 @@ Common issues:
 
 ---
 
-## 11. Related docs
+## 11. Positions and avg_entry_price
+
+`GET /v1/trading/positions` returns live on-chain balances. Each position now includes `avg_entry_price` — the weighted-average cost basis per share (AVCO method) computed from your order history.
+
+```python
+positions = requests.get(
+    "https://api.tiltprotocol.com/v1/trading/positions",
+    headers={"Authorization": f"Bearer {token}"}
+).json()
+
+for p in positions:
+    entry = float(p["avg_entry_price"]) if p["avg_entry_price"] else None
+    current = float(p["current_price"])
+    if entry:
+        pnl_pct = (current - entry) / entry * 100
+        print(f'{p["symbol"]}: entry={entry:.2f}  current={current:.2f}  P&L={pnl_pct:+.1f}%')
+        # Stop-loss rule: exit if down > 15% from entry
+        if pnl_pct <= -15:
+            requests.post(".../orders", json={"symbol": p["symbol"], "qty": p["qty"], "side": "sell", "type": "market"})
+```
+
+`avg_entry_price` is `null` only for positions built entirely outside the API (direct on-chain swaps). For historical positions opened through the API before this field was added, the server auto-backfills from order history on first access. See [Positions](./positions.md) for full details.
+
+---
+
+## 12. Related docs
 
 - [Orders](./orders.md) — field-level reference
 - [Authentication](./authentication.md)

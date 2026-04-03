@@ -374,6 +374,12 @@ components:
         avg_entry_price:
           type: string
           nullable: true
+          description: >
+            Weighted-average cost basis per share (AVCO method) across all filled buy orders for
+            this symbol in this vault. Updated on every fill. For positions opened before order
+            history tracking was introduced, the server auto-backfills from historical order records
+            on the first `/positions` call. `null` only when no buy order history exists (e.g. tokens
+            deposited directly on-chain bypassing the trading API).
         side:
           type: string
           example: long

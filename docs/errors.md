@@ -59,6 +59,15 @@ Errors return JSON with a numeric `code` and a human-readable `message`:
 
 Other `422` responses may return an **order-shaped body** with `status: "rejected"` and `error_message` when a **market** order fails execution.
 
+#### `rejected` market orders and relayer nonces
+
+If `error_message` mentions **`nonce`** (e.g. *nonce has already been used*), treat the outcome as **uncertain** until you verify on-chain state:
+
+- Poll **`GET /v1/trading/orders/:id`** — the order may later show **`filled`** with a `tx_hash` if a mempool transaction succeeded.
+- Check **`GET /v1/trading/positions`** and **`GET /v1/trading/account`** before submitting a **duplicate** trade.
+
+**Prevention:** Send a unique **`client_order_id`** on every intended order; the API deduplicates by `(vault, client_order_id)` and returns the existing order on retry (see [Orders](./orders.md#relayer-nonces-and-burst-market-orders)). The backend also **serializes** relayer transactions to avoid nonce collisions; agents should still avoid blind retries after `rejected`.
+
 ### Internal (500xx)
 
 | Code | Description |
@@ -74,4 +83,5 @@ Other `422` responses may return an **order-shaped body** with `status: "rejecte
 
 - Log `code` and `message` for support tickets.
 - For limit orders, poll `GET /v1/trading/orders/:id` until terminal state; `rejected` often indicates an on-chain or configuration issue (e.g. delegate).
-- See the [Trading guide](./trading-guide.md) for expected limit behavior vs. market.
+- For **market** orders from automation: always set **`client_order_id`**; after **`rejected`**, verify positions/account before re-submitting with a **new** id.
+- See the [Trading guide](./trading-guide.md) (§12) and [Orders](./orders.md#relayer-nonces-and-burst-market-orders) for relayer nonce behavior and pacing.

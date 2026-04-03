@@ -69,6 +69,10 @@ paths:
       description: |
         Market orders execute immediately. Limit orders return `status=accepted` and fill asynchronously when
         the oracle price meets the limit (buy: price ≤ limit; sell: price ≥ limit), subject to market hours and vault delegate authorization.
+
+        **Relayer / automation:** Use a unique `client_order_id` per intended order (per vault). Duplicate `client_order_id`
+        returns the existing order (idempotent). If a market order returns `rejected` with a nonce-related error, verify
+        positions and account before retrying with a new id. See API docs: Orders (relayer & burst orders) and Trading guide §12.
       tags: [Orders]
       requestBody:
         required: true
@@ -280,6 +284,9 @@ components:
           description: Required when `time_in_force` is `gtd` (ISO-8601, e.g. 2026-06-30T16:00:00.000Z).
         client_order_id:
           type: string
+          description: >
+            Recommended for programmatic clients. Idempotency key scoped to the vault: submitting the same value again
+            returns the existing order (HTTP 200) without placing a duplicate trade.
 
     Order:
       type: object

@@ -42,9 +42,12 @@ curl -X POST https://api.tiltprotocol.com/v1/trading/orders \
     "notional": "5000",
     "side": "buy",
     "type": "market",
-    "time_in_force": "day"
+    "time_in_force": "day",
+    "client_order_id": "my-first-trade-001"
   }'
 ```
+
+For **programmatic** and **agent** trading, always send a unique **`client_order_id`** per intended order (idempotency). If a market order returns **`rejected`** with a **nonce** error, verify **positions** before retrying with a new id — see [Orders](docs/orders.md#relayer-nonces-and-burst-market-orders) and [Trading guide §12](docs/trading-guide.md#12-relayer-wallet-nonces-and-safe-automation).
 
 ### 3. Check your positions
 

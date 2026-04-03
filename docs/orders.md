@@ -74,7 +74,21 @@ POST /v1/trading/orders
 | `time_in_force` | string | yes | `"day"`, `"gtc"`, `"gtd"`, `"ioc"`, or `"fok"`. |
 | `limit_price` | string | limit only | Required when `type` is `"limit"` — USD per share. |
 | `expires_at` | string | GTD only | ISO-8601; required when `time_in_force` is `"gtd"`. |
-| `client_order_id` | string | no | Your correlation / idempotency key. |
+| `client_order_id` | string | no | **Strongly recommended for agents.** Your idempotency key per vault: duplicate submissions with the same `client_order_id` return the **existing** order (HTTP 200) instead of placing a second trade. Use a unique value per intended order (UUID, strategy run id + leg, etc.). |
+
+### Relayer, nonces, and burst market orders
+
+Market orders are executed by the **backend relayer** (`0xd3f9Dcd6011E1aA13eEB277d9CE5F2f7c9BB6070` when using the standard Tilt deployment). Each fill involves **on-chain transactions** (oracle price push + `executeTrade`) that must use a single, monotonic **account nonce**.
+
+**What went wrong historically (Apr 2026):** Submitting **many market orders in parallel or within a few seconds** could cause RPC errors such as `nonce has already been used`. The API sometimes returned **`422`** with `status: "rejected"` while a transaction was **still in the mempool**, which could **confirm later** — leading to **double fills** if the client retried. **Mitigation on the client side** (still good practice): use a unique `client_order_id`, verify `GET /v1/trading/positions` (or account cash) before retrying, and prefer **`gtc`** for limit workflows when **`day`** session expiry is not required.
+
+**Server-side fix:** The trading service now **serializes** relayer transactions and assigns **explicit nonces** so concurrent HTTP requests are queued and confirmed in order. You should still send **`client_order_id`** on every programmatic order so retries are idempotent.
+
+**Recommended agent behavior:**
+
+1. Always set **`client_order_id`** (unique per intended order for that vault).
+2. After a **`rejected`** market order, **do not** immediately retry with a new id — first **`GET /v1/trading/orders/:id`** (if you have the id) and **`GET /v1/trading/positions`** to see if the trade actually landed.
+3. For **rebalances** with many legs, either rely on the server queue (sequential execution) or submit one order at a time and wait for **`filled`** / terminal status before the next.
 
 ### Example — market buy (notional)
 
@@ -84,7 +98,8 @@ POST /v1/trading/orders
   "notional": "5000",
   "side": "buy",
   "type": "market",
-  "time_in_force": "day"
+  "time_in_force": "day",
+  "client_order_id": "rebalance-2026-04-07-aapl-1"
 }
 ```
 

@@ -55,7 +55,7 @@ If the delegate is not authorized, limit orders may be **accepted** in the order
 | `time_in_force` | yes* | `day`, `gtc`, `gtd`, `ioc`, or `fok` (see §5). Defaults to `day` if omitted in some clients—set explicitly for clarity. |
 | `limit_price` | limit only | Max **average** price per share you accept on a buy, or min on a sell (see §6). |
 | `expires_at` | GTD only | ISO-8601 datetime when the order must expire, e.g. `2026-06-30T16:00:00.000Z` |
-| `client_order_id` | no | Your idempotency / correlation id |
+| `client_order_id` | **recommended** | Unique per intended order per vault — **idempotency**. Duplicates return the existing order (no second trade). |
 
 \*Validation requires `time_in_force` to be one of the allowed values; see [Orders](./orders.md) for details.
 
@@ -66,7 +66,7 @@ If the delegate is not authorized, limit orders may be **accepted** in the order
 - `type`: `"market"`
 - Executed **immediately** in the same request path: price refresh → on-chain trade → response usually `status: "filled"` with `tx_hash`.
 - Typical latency is a few seconds, depending on RPC and confirmation.
-- `time_in_force` is still validated; common choice is `"day"`.
+- `time_in_force` is still validated; common choice is `"day"`. For **limit** orders that must stay open across sessions, prefer **`gtc`** or **`gtd`** over **`day`** (see §5).
 
 ---
 
@@ -160,7 +160,32 @@ Common issues:
 
 ---
 
-## 12. Example flows
+## 12. Relayer wallet, nonces, and safe automation
+
+All **`POST /v1/trading/orders`** market fills and limit-order **keeper** fills are signed by the **same backend relayer** (standard Tilt delegate: `0xd3f9Dcd6011E1aA13eEB277d9CE5F2f7c9BB6070`). On-chain transactions from that account share one **nonce sequence**.
+
+### Historical issue (Apr 2026)
+
+**Symptom:** Rapid-fire market orders (e.g. 3+ within &lt;10s) sometimes returned **`rejected`** with **`nonce has already been used`**, while a transaction was still **pending** and could **confirm tens of seconds later** — producing **unintended double fills** if the client retried immediately.
+
+**Operational impact:** Large rebalances could require **duplicate correction trades** (e.g. JPM, GE, V, MSFT double-filled during stress tests).
+
+### Current platform behavior
+
+- The service **queues** relayer sends and uses **explicit nonces** so concurrent HTTP requests do not collide.
+- **`client_order_id`** is stored per vault: resubmitting the **same** id returns the **existing** order (idempotent retry), not a new trade.
+
+### What agents should still do
+
+1. **Always** send a unique **`client_order_id`** per logical order (UUID or `runId+symbol+leg`).
+2. If you receive **`rejected`** with a nonce-related **`error_message`**, **verify** `GET /v1/trading/positions` and `GET /v1/trading/account` (and the order by id if known) **before** placing a “replacement” trade with a **new** `client_order_id`.
+3. Prefer **`gtc`** / **`gtd`** for limits when **`day`** expiry is not desired (unchanged product semantics; reduces confusion during off-hours testing).
+
+For field-level detail, see [Orders — Relayer, nonces, and burst market orders](./orders.md#relayer-nonces-and-burst-market-orders).
+
+---
+
+## 13. Example flows
 
 Minimal **GTC limit buy** (curl):
 

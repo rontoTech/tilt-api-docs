@@ -31,20 +31,31 @@ You authenticate this single request by signing a message with your wallet. Afte
 
 ### Signing Message Format
 
+The server verifies **EIP-191 `personal_sign`** with this **exact** UTF-8 message (newlines matter):
+
 ```
-Sign this message to generate Tilt API keys.\n\nVault: {vault_address}\nTimestamp: {unix_timestamp}\nNonce: {random_nonce}
+Sign this message to create a Tilt Protocol API key.
+
+This does not cost gas and does not grant access to your funds.
+
+Vault: {vault_address}
+Timestamp: {unix_timestamp}
 ```
+
+`timestamp` is Unix **seconds** and must be within **5 minutes** of server time when `POST /v1/auth/keys` is received.
 
 ### Request
 
 ```json
 {
+  "wallet_address": "0xYourCuratorWallet",
   "vault_address": "0xYourVaultAddress",
   "signature": "0xYourWalletSignature",
-  "timestamp": 1719000000,
-  "nonce": "a1b2c3d4"
+  "timestamp": 1719000000
 }
 ```
+
+`wallet_address` must match the address that signed the message (the vault **curator**).
 
 ### Response
 

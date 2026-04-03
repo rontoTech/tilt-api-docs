@@ -9,10 +9,11 @@ Trade tokenized equities on-chain through a familiar REST API. If you've used Al
 After creating a vault on [tiltprotocol.com](https://tiltprotocol.com), generate API keys:
 
 ```bash
+# Build the EIP-191 message exactly as in docs/authentication.md, sign with the curator wallet, then:
 curl -X POST https://api.tiltprotocol.com/v1/auth/keys \
   -H "Content-Type: application/json" \
   -d '{
-    "wallet_address": "0xYourWallet",
+    "wallet_address": "0xYourCuratorWallet",
     "vault_address": "0xYourVault",
     "signature": "0x...",
     "timestamp": 1711584000

@@ -112,9 +112,10 @@ This matches standard limit semantics but surprises teams who expect “sell at 
 
 ## 7. Market hours and evaluation cadence
 
-- Limit **fills** are evaluated when the service considers US equity hours **open** (with a pre/post window as implemented by the backend). Outside that window, resting orders typically **stay open** without fill attempts; **`day`** orders may be **expired** after the close.
-- **`gtd`** expiry is evaluated **independently** of market hours — an order can expire at `expires_at` even when the cash market is closed.
-- The keeper runs on a **short polling interval** (order of **~5 seconds**, configurable server-side). Fills are not instantaneous.
+- **`day`** orders: when the service considers the US equity session **closed**, open day orders are **expired** (they disappear from `status=open`).
+- **`gtc`** / **`gtd`** orders: the keeper **continues to evaluate** fill conditions outside the cash session, using the latest on-chain router prices and/or quote feeds (so a buy limit at or above the last pushed price can still fill after hours if execution succeeds). Only **`day`** time-in-force is tied to session expiry in this sense.
+- **`gtd`** expiry uses **`expires_at`** **independently** of market hours.
+- The keeper runs on a **short polling interval** (on the order of **~5 seconds**, configurable server-side). Fills are not instantaneous.
 
 ---
 

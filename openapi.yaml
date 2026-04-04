@@ -272,11 +272,11 @@ paths:
           application/json:
             schema:
               type: object
-              required: [vault, content]
+              required: [content]
               properties:
                 vault:
                   type: string
-                  description: The 0x address of the vault
+                  description: The 0x address of the vault (optional if TILT-API-KEY-ID and TILT-API-SECRET headers are provided)
                   example: "0x18329D2fA6d8f9878afedE8Cfd7A4599ba5BFCc6"
                 content:
                   type: string

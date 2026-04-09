@@ -11,6 +11,7 @@ Fill logic (keeper):
 Requires: TILT-API-KEY-ID, TILT-API-SECRET, vault delegate authorized for fills.
 """
 import time
+import uuid
 from datetime import datetime, timezone, timedelta
 
 import requests
@@ -35,6 +36,7 @@ def poll_until_terminal(order_id: str, poll_s: float = 5.0):
 
 def example_gtc_limit_buy():
     """GTC limit buy by share qty."""
+    client_order_id = f"gtc-buy-{uuid.uuid4().hex[:8]}"
     r = requests.post(
         f"{BASE_URL}/v1/trading/orders",
         headers=HEADERS,
@@ -45,6 +47,7 @@ def example_gtc_limit_buy():
             "type": "limit",
             "limit_price": "180.00",
             "time_in_force": "gtc",
+            "client_order_id": client_order_id
         },
         timeout=60,
     )
@@ -56,6 +59,7 @@ def example_gtc_limit_buy():
 
 def example_notional_limit_buy():
     """Limit buy sized by USD notional."""
+    client_order_id = f"notional-buy-{uuid.uuid4().hex[:8]}"
     r = requests.post(
         f"{BASE_URL}/v1/trading/orders",
         headers=HEADERS,
@@ -66,6 +70,7 @@ def example_notional_limit_buy():
             "type": "limit",
             "limit_price": "350.00",
             "time_in_force": "gtc",
+            "client_order_id": client_order_id
         },
         timeout=60,
     )
@@ -76,6 +81,7 @@ def example_notional_limit_buy():
 def example_gtd_limit_sell():
     """GTD requires expires_at (ISO-8601)."""
     exp = (datetime.now(timezone.utc) + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    client_order_id = f"gtd-sell-{uuid.uuid4().hex[:8]}"
     r = requests.post(
         f"{BASE_URL}/v1/trading/orders",
         headers=HEADERS,
@@ -87,6 +93,7 @@ def example_gtd_limit_sell():
             "limit_price": "999.00",
             "time_in_force": "gtd",
             "expires_at": exp,
+            "client_order_id": client_order_id
         },
         timeout=60,
     )

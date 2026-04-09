@@ -105,7 +105,7 @@ Every request requires two headers:
 
 ## Examples
 
-- [Python](examples/python/)
+- [Python](examples/python/) (includes `agent_helpers.py` for AI agents)
 - [TypeScript](examples/typescript/)
 - [VB.NET](examples/vbnet/) — drop-in client for IB TWS API users
 - [curl](examples/curl/examples.sh)

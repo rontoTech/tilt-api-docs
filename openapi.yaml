@@ -409,6 +409,7 @@ paths:
                   example: "Rotating into semiconductors"
                 content:
                   type: string
+                  minLength: 5
                   maxLength: 4000
                   description: The post body (min 5 characters, max 4000). Supports Markdown (headings, bold, italic, bullet/numbered lists, tables, code) and is rendered as a Markdown preview in the UI.
                   example: "Trimmed **NVDA** 5% after the run-up.\n\n## Why\n- **AMD** — cheaper multiple\n- **AVGO** — dividend + AI tailwind"

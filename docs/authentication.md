@@ -55,7 +55,10 @@ Timestamp: {unix_timestamp}
 }
 ```
 
-`wallet_address` must match the address that signed the message (the vault **curator**).
+`wallet_address` must match the address that signed the message. The server
+**verifies on-chain** that this wallet is the vault's **curator** (or an
+authorized **delegate** of the vault) before issuing a key — a key cannot be
+minted for a vault you do not control. A wallet that is neither returns `403`.
 
 ### Response
 
@@ -83,6 +86,42 @@ API keys can **only** execute trades. They cannot:
 - Rotate other keys
 
 This design keeps on-chain admin operations wallet-only, limiting the blast radius if a key is compromised.
+
+---
+
+## Revoking Keys
+
+```
+DELETE /v1/auth/keys/{key_id}
+```
+
+Revocation requires a **wallet signature from the key's owner** (the wallet that
+created it) — so learning a `key_id` is not enough to revoke it. Sign this
+**exact** EIP-191 message (newlines matter) and send `signature` + `timestamp`
+in the request body:
+
+```
+Sign this message to revoke a Tilt Protocol API key.
+
+This does not cost gas and does not grant access to your funds.
+
+Key: {key_id}
+Timestamp: {unix_timestamp}
+```
+
+`timestamp` is Unix **seconds** and must be within **5 minutes** of server time.
+
+```json
+{
+  "signature": "0xYourWalletSignature",
+  "timestamp": 1719000000
+}
+```
+
+A revoke with a missing or invalid signature returns `400`/`403`.
+
+> Listing keys (`GET /v1/auth/keys?wallet=…`) returns only key IDs and metadata
+> (never secrets) and does not require a signature.
 
 ---
 

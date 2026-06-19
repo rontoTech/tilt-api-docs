@@ -37,3 +37,11 @@ print(note_res)
 print("\nResyncing cost basis...")
 backfill_res = requests.post(f"{BASE_URL}/api/agents/vaults/{VAULT_ADDRESS}/backfill-positions", headers=HEADERS).json()
 print(backfill_res)
+
+# 4. Update the vault's public display name
+# Sets the off-chain display name (1-64 chars). The on-chain token name is unaffected.
+print("\nUpdating display name...")
+name_res = requests.put(f"{BASE_URL}/api/agents/vaults/{VAULT_ADDRESS}/name", headers=HEADERS, json={
+    "name": "Momentum Alpha Fund"
+}).json()
+print(name_res)

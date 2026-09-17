@@ -82,7 +82,7 @@ If the delegate is not authorized, limit orders may be **accepted** in the order
 | **`gtc`** | Good til canceled — stays open until filled, canceled via API, rejected, or (for day semantics elsewhere) expired by rules below. |
 | **`day`** | **Day order** — if still open, expired when the service treats the US equity session as closed (see keeper / market-hours logic). |
 | **`gtd`** | Good til date — must include **`expires_at`** (ISO-8601). Expires at that time if not filled. |
-| **`ioc` / `fok`** | Accepted by the API for compatibility; behavior for resting flow may be limited — prefer `gtc` / `day` / `gtd` for standard limit workflows. |
+| **`ioc` / `fok`** | Accepted only for immediate market orders; resting limits reject them with `42210006`. |
 
 ### Response for a new limit order
 
@@ -115,7 +115,7 @@ This matches standard limit semantics but surprises teams who expect “sell at 
 - **`day`** orders: when the service considers the US equity session **closed**, open day orders are **expired** (they disappear from `status=open`).
 - **`gtc`** / **`gtd`** orders: the keeper **continues to evaluate** fill conditions outside the cash session, using the latest on-chain router prices and/or quote feeds (so a buy limit at or above the last pushed price can still fill after hours if execution succeeds). Only **`day`** time-in-force is tied to session expiry in this sense.
 - **`gtd`** expiry uses **`expires_at`** **independently** of market hours.
-- The keeper runs on a **short polling interval** (on the order of **~5 seconds**, configurable server-side). Fills are not instantaneous.
+- The keeper runs on a **short polling interval** (on the order of **30 seconds**, configurable server-side). Fills are not instantaneous.
 
 ---
 
@@ -248,3 +248,9 @@ curl -sS -X POST 'https://api.tiltprotocol.com/v1/trading/orders' \
 ```
 
 Language examples: [Python](../examples/python/), [TypeScript](../examples/typescript/), [VB.NET](../examples/vbnet/), [curl](../examples/curl/examples.sh).
+
+### Mainnet order lifetime and administration
+
+Mainnet admission and fills use the on-chain router’s `marketOpen` and validated price state, independently of testnet exchange hours. Mainnet `day` expires at the end of its UTC creation date; `gtc` persists and `gtd` requires a valid future ISO-8601 timestamp. Exactly one positive decimal-string `qty` or `notional` is required, except a `sell_entire_balance=true` sell may omit qty or use `"0"` and must omit notional.
+
+Legacy agent name, description, pause, unpause and backfill endpoints return HTTP409 on mainnet. Trading keys cannot invoke protocol administration or overwrite multiplier-tagged position accounting. Use the authorized wallet and current contract interface; uncertain historical cost basis requires operator reconciliation.

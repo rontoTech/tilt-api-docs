@@ -44,7 +44,7 @@ Instead of a brokerage account, you have a **vault** — a smart contract that h
 Quantities map to on-chain token balances. Fractional share support is on the roadmap but not yet available. Use `notional` orders to invest a dollar amount; the protocol handles the math.
 
 ### Limit orders: resting behavior and hours
-Limit orders are **resting**: `POST` returns `accepted` and a **keeper** attempts fills on a short interval (~5s) when US equity hours are **open** (with a pre/post window on the server). Outside that window, orders usually stay open without fill attempts; **`day`** orders may **expire** after the close. **`gtd`** orders also expire at **`expires_at`** regardless of market hours.
+Limit orders are **resting**: `POST` returns `accepted` and a **keeper** attempts fills on a short interval (30s) when US equity hours are **open** (with a pre/post window on the server). Outside that window, orders usually stay open without fill attempts; **`day`** orders may **expire** after the close. **`gtd`** orders also expire at **`expires_at`** regardless of market hours.
 
 Fill rules: **buy** when quote **≤** `limit_price`; **sell** when quote **≥** `limit_price`. See [Trading guide](./trading-guide.md).
 

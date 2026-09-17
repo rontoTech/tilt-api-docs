@@ -16,7 +16,9 @@ curl -X POST https://api.tiltprotocol.com/v1/auth/keys \
     "wallet_address": "0xYourCuratorWallet",
     "vault_address": "0xYourVault",
     "signature": "0x...",
-    "timestamp": 1711584000
+    "timestamp": 1711584000,
+    "nonce": "0xYourFreshRandom32ByteNonce",
+    "chain_id": 4663
   }'
 ```
 
@@ -78,6 +80,10 @@ Every request requires two headers:
 | `TILT-API-SECRET` | Your API secret (starts with `sk_live_`) |
 
 ## Endpoints
+
+Investor cash entry and exit use the public read-only [mainnet basket quote endpoint](docs/basket-quotes.md), `POST /v1/vaults/{vault}/basket-quote`. It returns a transaction for the investor to review and sign; trading keys cannot withdraw funds.
+
+For mainnet market orders, HTTP **202** / `pending_new` means the outcome requires reconciliation. Poll the existing order and keep its `client_order_id`; a missing hash or timed-out request is not permission to submit a replacement trade.
 
 | Method | Path | Description |
 |--------|------|-------------|

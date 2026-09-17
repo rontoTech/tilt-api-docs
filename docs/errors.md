@@ -12,6 +12,7 @@
 | `422` | Validation error — request body or parameters are invalid |
 | `429` | Rate limit exceeded |
 | `500` | Internal server error |
+| `503` | Authorization or another required service is temporarily unavailable |
 
 ---
 
@@ -40,7 +41,10 @@ Errors return JSON with a numeric `code` and a human-readable `message`:
 
 | Code | Description |
 |------|-------------|
-| `40310001` | Invalid API key — key does not exist or secret does not match |
+| `40310001` | Invalid/revoked key, wrong chain, wrong secret, or lost vault authority |
+| `40310005` | Signature nonce already used or invalid |
+| `50310003` | Cannot verify current authorization; retry when Redis/RPC recovers |
+| `50310004` | Basket cash quote or required deployment/read is unavailable |
 
 ### Validation (422xx) — trading `POST /v1/trading/orders`
 
@@ -56,6 +60,18 @@ Errors return JSON with a numeric `code` and a human-readable `message`:
 | `42210008` | Order cannot be canceled (already filled or canceled) |
 | `42210009` | Failed to deploy token for symbol (message truncated in response) |
 | `42210010` | `expires_at` is required when `time_in_force` is `gtd` |
+| `42210011` | Market is closed |
+| `42210012` | Sequencer is unavailable or inside its recovery grace period |
+| `42210013` | Required price is stale or unavailable |
+| `42210014` | Token oracle is paused or its pause status cannot be verified |
+| `42210015` | Firm quote exceeds the allowed oracle deviation |
+| `42210017` | Vault base asset, execution engine or price router differs from this manager API deployment |
+| `42210016` | Firm quote cannot satisfy the exact mainnet limit price; the limit order remains resting |
+| `42210020` | Invalid basket quote request or cash/fee bound cannot be met |
+| `42210021` | Vault already has 1,000 live orders; close resting orders before creating more |
+| `42910001` | Public basket quote rate limit exceeded |
+
+HTTP **202** with `status: "pending_new"` is an unresolved execution outcome, not a rejection. Poll the existing order and never retry it under a new `client_order_id`; it may already have settled even when the transaction hash is unavailable. See [Orders](./orders.md#unknown-execution-outcomes).
 
 Other `422` responses may return an **order-shaped body** with `status: "rejected"` and `error_message` when a **market** order fails execution.
 

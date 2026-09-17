@@ -10,8 +10,8 @@ For a narrative walkthrough (fill logic, delegate, market hours), see the **[Fun
 
 | Type | Behavior |
 |------|----------|
-| **market** | Executes immediately: fresh oracle price is pushed, then the vault trades on-chain. Response is usually `filled` within seconds, with `tx_hash`. |
-| **limit** | **Resting order.** Stored as `accepted` and monitored by the limit-order keeper (~5s poll). When the live quote meets your limit rule (see guide), the service submits `executeTrade` on your vault. |
+| **market** | Mainnet requests a firm venue quote and settles through the protocol engine. A confirmed, parsed fill returns `filled`; an unresolved outcome returns HTTP 202 with `pending_new`. Testnet retains its oracle-backed execution path. |
+| **limit** | Stored as `accepted` and monitored by the keeper (default 30-second poll). On mainnet the live reference triggers a quote; the actual on-chain minimum output also enforces the investor's limit. |
 
 ---
 
@@ -22,7 +22,7 @@ For a narrative walkthrough (fill logic, delegate, market hours), see the **[Fun
 | **`day`** | Day order — expires after the service’s US equity session rules (typically after close / extended window end). |
 | **`gtc`** | Good til canceled — remains open until filled, `DELETE` canceled, expired by other rules, or **rejected** on failed execution. |
 | **`gtd`** | Good til date — requires **`expires_at`** (ISO-8601). Order expires at that instant if not yet filled (evaluated even when the cash market is closed). |
-| **`ioc`**, **`fok`** | Accepted for API compatibility; prefer **`day` / `gtc` / `gtd`** for standard resting limits. |
+| **`ioc`**, **`fok`** | Accepted only for immediate market orders. Resting limits reject IOC/FOK with `42210006`. |
 
 ### GTD and `expires_at`
 
@@ -47,12 +47,26 @@ new ──▶ accepted ──▶ filled
 |--------|---------|
 | **new** | Market order: received, about to execute. |
 | **accepted** | Limit order: validated and resting until fill or terminal state. |
-| **pending_new** | Transitional (rare in responses). |
+| **pending_new** | Execution is in progress or requires reconciliation. The transaction may already have settled even when `tx_hash` is null. Do not submit a replacement order under a new ID. |
 | **partially_filled** | Reserved; full fills are atomic today. |
 | **filled** | Trade completed on-chain; `tx_hash` set when available. |
 | **canceled** | Canceled via `DELETE`. |
 | **expired** | `day` or `gtd` cutoff reached without fill. |
 | **rejected** | Failed validation or keeper execution error; see `error_message` if present. |
+
+Mainnet limit prices are per display share. The backend converts display shares using the live token multiplier and sets an exact integer minimum output. A quote whose worst-case input and output cannot satisfy the limit remains unfilled, including exact-output quotes with an input allowance above the limit. A reference-price crossing alone cannot authorize a worse execution price.
+
+A vault may have at most **1,000 live orders** (`new`, `accepted`, `pending_new`, or `partially_filled`). Additional orders return `42210021`; idempotent replays remain available. Close unneeded resting orders before creating more. The keeper rotates bounded batches between vaults and within each vault, so a large book may take multiple polls to check completely.
+
+Orders retain the authorizing wallet and deployment chain. Before mainnet settlement, the service checks that the wallet remains the curator or an active delegate and that an API key remains valid. Revoking the wallet's authority or its key prevents later fills of that wallet's resting orders. A transient authorization read failure defers a limit fill.
+
+### Unknown execution outcomes
+
+HTTP 202 / `pending_new` requires polling the existing order. Reuse the original `client_order_id` if retrying the same HTTP submission. **Never replace an unresolved order with a new ID.** A missing receipt, failed bookkeeping write, expired fill lease, or null hash is not evidence that no trade occurred.
+
+The service records intent before sending. A known successful receipt is reconciled using actual fill amounts; a known revert closes the order without resubmission. A pre-broadcast interruption may safely requeue a limit order. An unknown broadcast with no recoverable hash, or an older pending record without the durable guard, stays pending for operator reconciliation. Cancel and expiry operations cannot override an in-flight order. Missing fill amounts stay pending rather than being inferred from a quote.
+
+Investor deposits and cash redemptions use the separate [basket quote endpoint](./basket-quotes.md); trading keys do not authorize withdrawals.
 
 ---
 
@@ -67,7 +81,7 @@ POST /v1/trading/orders
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `symbol` | string | yes | Ticker (e.g. `"AAPL"`). |
-| `qty` | string | one of `qty` or `notional` | Share quantity (decimal string). |
+| `qty` | string | one of `qty` or `notional` | Positive share quantity (decimal string), mutually exclusive with notional. |
 | `notional` | string | one of `qty` or `notional` | USD amount for the order (common on **buy**). |
 | `side` | string | yes | `"buy"` or `"sell"`. |
 | `type` | string | yes | `"market"` or `"limit"`. |
@@ -209,3 +223,9 @@ Cancels an open order. Returns the order with `status: "canceled"`. Already **fi
 - **Sell limit** fills when **market quote ≥ `limit_price`**.
 
 See the [Trading guide](./trading-guide.md#6-when-does-a-limit-order-fill-important) for examples and common misconceptions.
+
+### Mainnet order lifetime and administration
+
+Mainnet admission and fills use the on-chain router’s `marketOpen` and validated price state, independently of testnet exchange hours. Mainnet `day` expires at the end of its UTC creation date; `gtc` persists and `gtd` requires a valid future ISO-8601 timestamp. Exactly one positive decimal-string `qty` or `notional` is required, except a `sell_entire_balance=true` sell may omit qty or use `"0"` and must omit notional.
+
+Legacy agent name, description, pause, unpause and backfill endpoints return HTTP409 on mainnet. Trading keys cannot invoke protocol administration or overwrite multiplier-tagged position accounting. Use the authorized wallet and current contract interface; uncertain historical cost basis requires operator reconciliation.

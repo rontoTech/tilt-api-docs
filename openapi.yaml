@@ -169,6 +169,9 @@ paths:
         Unknown execution outcomes return 202/pending_new and must not be retried under a new client_order_id.
         Unsupported vault base/engine/router configurations return 42210017; new vault generations need explicit API configuration.
         At most 1,000 live orders per vault; excess new orders return 42210021. Keeper checks rotate bounded batches.
+        Pricing health failures return 42210012. A configured Tilt operational-health gate uses expiring
+        operator observations and deliberate recovery; it is not a Chainlink sequencer-uptime oracle.
+        Managers cannot reopen it. Raw basket exits remain available when performance valuation fails.
 
         **Relayer / automation:** Use a unique `client_order_id` per intended order (per vault). Duplicate `client_order_id`
         returns the existing order (idempotent). If a market order returns `rejected` with a nonce-related error, verify

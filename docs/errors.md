@@ -61,7 +61,7 @@ Errors return JSON with a numeric `code` and a human-readable `message`:
 | `42210009` | Failed to deploy token for symbol (message truncated in response) |
 | `42210010` | `expires_at` is required when `time_in_force` is `gtd` |
 | `42210011` | Market is closed |
-| `42210012` | Sequencer is unavailable or inside its recovery grace period |
+| `42210012` | Pricing health is unavailable or recovering; includes an expired/stopped Tilt operational-health gate |
 | `42210013` | Required price is stale or unavailable |
 | `42210014` | Token oracle is paused or its pause status cannot be verified |
 | `42210015` | Firm quote exceeds the allowed oracle deviation |

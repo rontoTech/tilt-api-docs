@@ -86,6 +86,8 @@ If `error_message` mentions **`nonce`** (e.g. *nonce has already been used*), tr
 
 ### Internal (500xx)
 
+Mainnet account reporting returns HTTP **503** with code **`50310005`**, `Vault valuation temporarily unavailable`, when the basket lens cannot compute NAV. Treat this as unavailable valuation, never zero holdings or zero value. Raw basket exits and reserved-token claims remain separate and available. Unexpected RPC/ABI/configuration failures retain the generic `50010007` account error.
+
 | Code | Description |
 |------|-------------|
 | `50010001` | Internal error placing order |

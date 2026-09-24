@@ -305,6 +305,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
+        "503":
+          description: Mainnet NAV is temporarily unavailable (50310005); this is not a zero portfolio value. Raw basket exits remain available.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 50310005
+                  message:
+                    type: string
+                    example: Vault valuation temporarily unavailable
 
   /v1/trading/assets:
     get:
@@ -941,11 +954,17 @@ components:
           type: string
         status:
           type: string
-          enum: [active, not_deployed]
+          enum: [active, inactive, deployable, not_deployed]
         tradable:
           type: boolean
+          description: Mainnet advisory availability requires registry/feed eligibility, engine allowlisting, an unpaused engine and positive validated stock/base prices. Vault permissions, caps, liquidity and transfer restrictions are checked at execution.
         price:
           type: string
+          nullable: true
+          description: Mainnet USD price per display share; null when a positive validated reference or display multiplier is unavailable. Never infer a zero investment value from null.
+        price_available:
+          type: boolean
+          description: Present on mainnet and true exactly when price is non-null. Testnet response shape is unchanged.
         exchange:
           type: string
           example: TILT

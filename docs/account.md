@@ -4,6 +4,8 @@
 
 The account endpoint returns details about the vault associated with your API key.
 
+On mainnet, the immutable basket lens supplies available balances, NAV and share price. If it reports unavailable valuation (including stopped or recovering operational health), this endpoint returns **HTTP 503**, `{ "code": 50310005, "message": "Vault valuation temporarily unavailable" }`. This does not mean the holdings are worth zero. Raw basket redemption and reserved-token claims remain callable; do not make them depend on this endpoint succeeding. Unexpected RPC, ABI or configuration errors remain generic HTTP 500 responses.
+
 ---
 
 ## Get Account
@@ -17,7 +19,7 @@ GET /v1/trading/account
 ```json
 {
   "id": "vault_001",
-  "status": "active",
+  "status": "ACTIVE",
   "currency": "USD",
   "cash": "50000.00",
   "portfolio_value": "125000.00",
@@ -35,9 +37,9 @@ GET /v1/trading/account
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Unique vault identifier |
-| `status` | string | Vault status (`"active"`, `"paused"`) |
+| `status` | string | Vault status (`"ACTIVE"`, `"INACTIVE"`) |
 | `currency` | string | Base currency — always `"USD"` |
-| `cash` | string | Unallocated USDC balance in the vault |
+| `cash` | string | Available base-token balance (USDG on mainnet), excluding reserved claims |
 | `portfolio_value` | string | Total net asset value (cash + positions) |
 | `share_price` | string | Current price per vault share |
 | `buying_power` | string | Available funds for new orders (currently equal to `cash`) |

@@ -2,6 +2,8 @@
 
 **Base URL:** `https://api.tiltprotocol.com`
 
+This guide's token deployment and execution examples target **testnet, chain 46630**. For the separate real-asset beta on chain 4663, follow the [mainnet migration guide](mainnet-migration.md); activation is currently pending. Do not change an existing agent's environment implicitly.
+
 If you're coming from Alpaca or Interactive Brokers, this guide maps the concepts and endpoints you already know to their Tilt equivalents.
 
 ---

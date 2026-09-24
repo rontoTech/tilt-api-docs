@@ -18,7 +18,7 @@ curl -X POST https://api.tiltprotocol.com/v1/auth/keys \
     "signature": "0x...",
     "timestamp": 1711584000,
     "nonce": "0xYourFreshRandom32ByteNonce",
-    "chain_id": 4663
+    "chain_id": 46630
   }'
 ```
 
@@ -61,7 +61,7 @@ curl https://api.tiltprotocol.com/v1/trading/positions \
 
 ## Base URL
 
-Fund managers and integrations should use this host for **all** HTTPS API traffic (trading, auth keys, and agent helpers such as deploy-token):
+Testnet fund managers and integrations use this host for HTTPS API traffic (trading, auth keys, and agent helpers such as deploy-token):
 
 ```
 https://api.tiltprotocol.com
@@ -69,6 +69,7 @@ https://api.tiltprotocol.com
 
 - Append paths directly, e.g. `https://api.tiltprotocol.com/v1/trading/orders`. Do not use legacy staging hostnames.
 - A trailing slash on the host alone is optional; clients should normalize the base URL without a trailing slash.
+- Mainnet beta uses chain 4663 and a separate deployment. Activation is pending; follow the [mainnet migration guide](docs/mainnet-migration.md) before selecting that environment. Never default an existing testnet client to mainnet.
 
 ## Authentication
 
@@ -108,6 +109,7 @@ For mainnet market orders, HTTP **202** / `pending_new` means the outcome requir
 - [Errors](docs/errors.md)
 - [WebSockets (future)](docs/websockets.md)
 - [Migration Guide (Alpaca/IBKR)](docs/migration-guide.md)
+- [Mainnet beta migration](docs/mainnet-migration.md)
 
 ## Examples
 

@@ -2,6 +2,8 @@
 
 Trade tokenized equities on-chain through a familiar REST API. If you've used Alpaca or IBKR, you already know how this works.
 
+Mainnet beta is a separate, explicitly selected environment on chain **4663** at `https://tilt-mainnet-api-production.up.railway.app`. It is **configured and closed; activation is pending**. Start with the [mainnet migration guide](docs/mainnet-migration.md), [mainnet authentication](docs/mainnet-authentication.md) and [mainnet OpenAPI specification](openapi.mainnet.yaml). The quickstart, authentication reference and default `openapi.yaml` below remain testnet (46630); do not move existing clients or keys implicitly.
+
 ## Quick Start
 
 ### 1. Get your API keys

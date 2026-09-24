@@ -69,7 +69,7 @@ https://api.tiltprotocol.com
 
 - Append paths directly, e.g. `https://api.tiltprotocol.com/v1/trading/orders`. Do not use legacy staging hostnames.
 - A trailing slash on the host alone is optional; clients should normalize the base URL without a trailing slash.
-- Mainnet beta uses chain 4663 and a separate deployment. Activation is pending; follow the [mainnet migration guide](docs/mainnet-migration.md) before selecting that environment. Never default an existing testnet client to mainnet.
+- Mainnet beta uses chain 4663 and a separate deployment. Activation is pending; follow the [mainnet migration guide](docs/mainnet-migration.md), [mainnet authentication](docs/mainnet-authentication.md) and [mainnet OpenAPI specification](openapi.mainnet.yaml) before selecting that environment. Never default an existing testnet client to mainnet.
 
 ## Authentication
 

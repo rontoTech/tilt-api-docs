@@ -1,6 +1,6 @@
 # Mainnet basket and cash quotes
 
-This endpoint belongs to the immutable mainnet release candidate. It is available only after the backend is configured with the deployed basket factory and router. Testnet software. Not financial advice.
+This endpoint belongs to the deployed immutable mainnet beta on chain **4663**, using `https://tilt-mainnet-api-production.up.railway.app`. **Configured and closed; activation, health recovery and funded verification are pending.** API availability does not announce trading activation. The beta contracts have not been independently audited. Mainnet transactions use real assets and can lose the entire deposit. Not financial advice.
 
 `POST /v1/vaults/{vault}/basket-quote` is a public, read-only endpoint. It returns a transaction for the investor to review and sign. It never signs, approves tokens, spends investor funds, or broadcasts a transaction. Requests are limited to ten per minute per client IP.
 

@@ -11,7 +11,7 @@
 
 The mainnet API is deployed; this does not announce trading or app activation. Require an explicitly selected mainnet API origin, check `GET /api/agents/contracts` reports chain 4663 and `vaultModel: "immutable-basket-v1"`, and compare the connected RPC's chain ID. Never fall back to the testnet API. Keep keys, queued orders and saved addresses isolated by chain.
 
-The authentication message's `Domain: https://api.tiltprotocol.com` is a **fixed protocol signature domain**, even when HTTPS requests use another API origin. Keep those exact bytes; bind `chain_id: 4663`, the full action and a fresh one-time nonce. Recreate keys for the mainnet vault. Current curator/delegate authority is checked again for requests and settlement. See [authentication](authentication.md).
+The authentication message's `Domain: https://api.tiltprotocol.com` is a **fixed protocol signature domain**, even when HTTPS requests use another API origin. Keep those exact bytes; bind `chain_id: 4663`, the full action and a fresh one-time nonce. Recreate keys for the mainnet vault. Current curator/delegate authority is checked again for requests and settlement. See [mainnet authentication](mainnet-authentication.md) and the separate [mainnet OpenAPI specification](../openapi.mainnet.yaml). The default authentication page and `openapi.yaml` continue to describe testnet.
 
 ## Use the immutable basket interfaces
 
